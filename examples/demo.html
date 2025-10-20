@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CopyCat.js — Interactive Demo</title>
+    <style>
+        :root {
+            --max-width: 920px;
+            --accent: #2b6cb0;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            padding: 28px;
+            background: var(--bg);
+            color: #0f172a;
+        }
+
+        main {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(12, 18, 25, 0.06);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 20px;
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin-top: 4px;
+            margin-bottom: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"],
+        input[type="color"],
+        textarea {
+            font-size: 14px;
+            padding: 8px;
+            width: 320px;
+            border: 1px solid #e6eef7;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(43, 108, 176, 0.12);
+            font-size: 13px;
+        }
+
+        button.secondary {
+            background: #94a3b8;
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .log {
+            background: #0b1220;
+            color: #e6eef7;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            max-height: 240px;
+            overflow: auto;
+            margin-top: 12px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 13px;
+            background: #e6eef7;
+            color: #0b1724;
+        }
+
+        .example-box {
+            border: 1px dashed #e6eef7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+
+        footer {
+            margin-top: 18px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* Toast minimal styling (used by dist toast) */
+        #copycat-toast {
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>CopyCat.js — Interactive Demo</h1>
+        <p class="lead">
+            CopyCat.js motto: <strong>small · secure-first · dependable</strong>.
+            Prefer modern <code>navigator.clipboard.writeText</code>, fall back to a safe DOM-based copy,
+            provide feedback and easy hooks for success/error handling.
+        </p>
+
+        <section class="example-box" aria-labelledby="basic-head">
+            <h2 id="basic-head" style="font-size:15px;margin:0 0 8px 0">Basic text copy</h2>
+            <div class="row">
+                <input id="txt" type="text" placeholder="Type something to copy" aria-label="Text to copy" />
+                <button id="btnCopy">Copy text</button>
+                <button id="btnCopyFeedback" class="secondary">Copy with toast</button>
+            </div>
+            <div class="small">Demonstrates simple text copy and optional built-in feedback toast.</div>
+        </section>
+
+        <section class="example-box" aria-labelledby="json-head">
+            <h2 id="json-head" style="font-size:15px;margin:0 0 8px 0">Copy JSON</h2>
+            <div class="row">
+                <textarea id="json" aria-label="JSON to copy">{ "name": "Alice", "role": "developer" }</textarea>
+            </div>
+            <div class="row">
+                <button id="btnCopyJSON">Copy parsed JSON (type: json)</button>
+                <button id="btnCopyRawJSON" class="secondary">Copy raw text (no parse)</button>
+            </div>
+            <div class="small">If JSON is invalid, the demo falls back to copying raw text.</div>
+        </section>
+
+        <section class="example-box" aria-labelledby="element-head">
+            <h2 id="element-head" style="font-size:15px;margin:0 0 8px 0">Copy element value & HTML</h2>
+
+            <div class="row">
+                <input id="email" type="text" placeholder="email@example.com" aria-label="Email input" />
+                <button id="btnCopyInput">Copy input value</button>
+                <button id="btnCopyElementHtml" class="secondary">Copy element HTML</button>
+            </div>
+
+            <div class="row">
+                <label for="colorVal" class="small">Copy color literal:</label>
+                <input id="colorVal" type="color" value="#ff6600" aria-label="Color value" />
+                <button id="btnCopyColor">Copy color string</button>
+            </div>
+
+            <div class="small">This shows copying values from DOM elements and copying element.outerHTML (explicit).
+            </div>
+        </section>
+
+        <section class="example-box" aria-labelledby="hooks-head">
+            <h2 id="hooks-head" style="font-size:15px;margin:0 0 8px 0">Callbacks & Status</h2>
+            <div class="row">
+                <div class="status" id="lastStatus">No action yet</div>
+            </div>
+            <div class="row small">
+                <div>Logs from library calls (success / error) appear below:</div>
+            </div>
+            <pre class="log" id="log" aria-live="polite"></pre>
+        </section>
+
+        <footer>
+            <div>Note: To fully test the modern Clipboard API, serve this demo on <code>https://</code> or
+                <code>http://localhost</code>. If you open the file directly via <code>file://</code> the
+                navigator.clipboard API may be blocked and the fallback will run instead.
+            </div>
+        </footer>
+    </main>
+
+    <!--
+    Preferred: Import the ESM build from dist (modern browsers).
+    Path here expects `examples/demo/demo.html` and `dist/` at project root -> '../../dist/...'
+    Adjust paths if your repo layout differs.
+  -->
+    <script type="module">
+        // Adjust the path if dist is in a different location relative to this file.
+        import copy from '../../dist/copycat-js.esm.js';
+
+        // Helper to write structured messages to the log
+        const logEl = document.getElementById('log');
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent = `[${time}] ${msg}\n` + logEl.textContent;
+        }
+        function setStatus(text, ok = true) {
+            const el = document.getElementById('lastStatus');
+            el.textContent = text;
+            el.style.background = ok ? '#e6fff6' : '#ffecec';
+            el.style.color = ok ? '#0b5' : '#b00';
+        }
+
+        // Basic text copy
+        document.getElementById('btnCopy').addEventListener('click', async () => {
+            const v = document.getElementById('txt').value || 'Hello from CopyCat!';
+            const ok = await copy(v);
+            setStatus(ok ? 'Copied text (no feedback)' : 'Copy failed', ok);
+            log(`copy(text) -> ${ok}`);
+        });
+
+        // Copy with toast feedback (built-in)
+        document.getElementById('btnCopyFeedback').addEventListener('click', async () => {
+            const v = document.getElementById('txt').value || 'Copied with toast';
+            await copy(v, {
+                feedback: true,
+                onSuccess: (t) => { setStatus('Copied with toast'); log('onSuccess: ' + t); },
+                onError: (err) => { setStatus('Error copying', false); log('onError: ' + err.message); }
+            });
+        });
+
+        // Copy parsed JSON (type: json)
+        document.getElementById('btnCopyJSON').addEventListener('click', async () => {
+            const raw = document.getElementById('json').value;
+            let obj;
+            try {
+                obj = JSON.parse(raw);
+            } catch (err) {
+                obj = { raw };
+            }
+            const ok = await copy(obj, {
+                type: 'json',
+                feedback: 'JSON copied!',
+                onSuccess: (t) => { setStatus('JSON copied'); log('onSuccess (json)'); },
+                onError: (err) => { setStatus('JSON copy failed', false); log('onError JSON: ' + err.message); }
+            });
+            log(`copy(json) -> ${ok}`);
+        });
+
+        // Copy raw JSON string (no parse)
+        document.getElementById('btnCopyRawJSON').addEventListener('click', async () => {
+            const raw = document.getElementById('json').value;
+            const ok = await copy(raw, { type: 'text', feedback: 'Raw text copied' });
+            setStatus(ok ? 'Raw text copied' : 'Copy failed', ok);
+            log(`copy(raw text) -> ${ok}`);
+        });
+
+        // Copy input value (element handling)
+        document.getElementById('btnCopyInput').addEventListener('click', async () => {
+            const el = document.getElementById('email');
+            const ok = await copy(el, {
+                feedback: true,
+                onSuccess: (t) => { setStatus('Input value copied'); log('Copied input value: ' + t); },
+            });
+            log(`copy(element.value) -> ${ok}`);
+        });
+
+        // Copy element.outerHTML explicitly
+        document.getElementById('btnCopyElementHtml').addEventListener('click', async () => {
+            const el = document.getElementById('email');
+            // explicit: copy element.outerHTML as text (not innerText)
+            const ok = await copy(el.outerHTML, { type: 'text', feedback: 'Element HTML copied!' });
+            setStatus(ok ? 'Element HTML copied' : 'Copy failed', ok);
+            log(`copy(element.outerHTML) -> ${ok}`);
+        });
+
+        // Copy color string
+        document.getElementById('btnCopyColor').addEventListener('click', async () => {
+            const color = document.getElementById('colorVal').value || '#ff6600';
+            const ok = await copy(color, { type: 'color', feedback: 'Color copied!' });
+            setStatus(ok ? `Color ${color} copied` : 'Copy failed', ok);
+            log(`copy(color) -> ${ok}`);
+        });
+    </script>
+
+    <!-- UMD fallback: include this for non-module usage or quick script tag testing.
+       This file should exist at ../../dist/copycat-js.umd.js relative to this demo.
+       After the script tag loads window.CopyCat.copy will be available.
+  -->
+    <script>
+        (function () {
+            // If module import failed or you prefer UMD, dynamically load the UMD script as a fallback.
+            if (typeof window.CopyCat === 'undefined') {
+                const s = document.createElement('script');
+                s.src = '../../dist/copycat-js.umd.js'; // adjust path if needed
+                s.onload = function () {
+                    console.info('CopyCat UMD loaded as fallback.');
+                    // wire up a simple bridge similar to the module demo above
+                    const copy = window.CopyCat && window.CopyCat.copy;
+                    if (!copy) return;
+
+                    const logEl = document.getElementById('log');
+                    const log = (m) => {
+                        const time = new Date().toLocaleTimeString();
+                        logEl.textContent = `[${time}] ${m}\n` + logEl.textContent;
+                    };
+                    document.getElementById('btnCopy').addEventListener('click', async () => {
+                        const v = document.getElementById('txt').value || 'Hello UMD';
+                        const ok = await copy(v);
+                        log(`UMD copy(text) -> ${ok}`);
+                        document.getElementById('lastStatus').textContent = ok ? 'Copied (UMD)' : 'Copy failed (UMD)';
+                    });
+                    // Other buttons still bound to module path; this UMD fallback is primarily for direct script usage.
+                };
+                s.onerror = function () {
+                    console.warn('Could not load UMD fallback. Ensure dist/copycat-js.umd.js exists and path is correct.');
+                };
+                document.head.appendChild(s);
+            }
+        })();
+    </script>
+</body>
+
+</html>

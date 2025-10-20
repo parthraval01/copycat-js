@@ -1,0 +1,61 @@
+{
+    "name": "copycat-js",
+    "version": "0.1.0",
+    "description": "CopyCat.js — tiny, secure, and friendly clipboard helper (async Clipboard API + robust fallbacks + feedback hooks).",
+    "main": "dist/copycat-js.cjs.js",
+    "module": "dist/copycat-js.esm.js",
+    "browser": "dist/copycat-js.umd.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "src",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "clean": "rm -rf dist node_modules .rollup.cache",
+        "lint": "eslint \"src/**\" \"examples/**\"",
+        "format": "prettier --write \"src/**\" \"examples/**\" \"*.md\"",
+        "test": "vitest",
+        "build:cjs": "rollup -c rollup.config.cjs.js",
+        "build:esm": "rollup -c rollup.config.esm.js",
+        "build:umd": "rollup -c rollup.config.umd.js",
+        "build": "npm run build:esm && npm run build:cjs && npm run build:umd",
+        "prepublishOnly": "npm test && npm run build",
+        "prepare": "npm run build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yourusername/copycat-js.git"
+    },
+    "keywords": [
+        "clipboard",
+        "copy",
+        "copy-to-clipboard",
+        "clipboard-api",
+        "web",
+        "utility"
+    ],
+    "author": "Parth",
+    "license": "MIT",
+    "engines": {
+        "node": ">=14"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^25.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.0",
+        "@rollup/plugin-replace": "^5.0.0",
+        "eslint": "^8.0.0",
+        "prettier": "^2.0.0",
+        "rollup": "^3.0.0",
+        "rollup-plugin-terser": "^7.0.0",
+        "vitest": "^1.0.0",
+        "jsdom": "^22.0.0",
+        "cross-env": "^7.0.3",
+        "typescript": "^5.0.0"
+    },
+    "peerDependencies": {},
+    "publishConfig": {
+        "access": "public"
+    }
+}
