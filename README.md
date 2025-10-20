@@ -1,5 +1,3 @@
-Here's the `README.md` file in a **copy-paste** ready format:
-
 ````markdown
 # CopyCat.js
 
