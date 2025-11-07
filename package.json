@@ -26,7 +26,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/softwaredevelopr01/copycat-js.git"
+        "url": "https://github.com/softwaredeveloperhub01/copycat-js.git"
     },
     "keywords": [
         "clipboard",
@@ -36,7 +36,7 @@
         "web",
         "utility"
     ],
-    "author": "softwaredeveloper01",
+    "author": "softwaredeveloperhub01",
     "license": "MIT",
     "engines": {
         "node": ">=14"
